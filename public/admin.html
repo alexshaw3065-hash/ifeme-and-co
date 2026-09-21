@@ -92,6 +92,14 @@
         <label for="f-spec">Sizes / specification</label>
         <input id="f-spec" placeholder="e.g. 1L, 4L, 20L available" required />
 
+        <label for="f-image">Photo (optional)</label>
+        <input type="file" id="f-image" accept="image/*" />
+        <div id="image-preview-wrap" style="display:none;margin-top:10px">
+          <img id="image-preview" style="width:120px;height:120px;object-fit:cover;border-radius:4px;border:1px solid var(--border)" />
+          <button type="button" class="btn-secondary" id="remove-image-btn" style="margin-top:6px">Remove photo</button>
+        </div>
+        <p class="hint" id="image-status"></p>
+
         <div class="row">
           <button class="btn-primary" type="submit" id="save-btn">Save product</button>
           <button class="btn-secondary" type="button" id="cancel-edit-btn" style="display:none">Cancel edit</button>
@@ -129,6 +137,64 @@ const qs = (sel) => document.querySelector(sel);
 let sessionPassword = sessionStorage.getItem('ifeme_admin_pw') || '';
 let editingId = null;
 let products = [];
+let currentImageUrl = '';
+
+function resizeImageToBase64(file, maxSize = 900, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Could not read the file'));
+    reader.onload = () => {
+      img.onerror = () => reject(new Error('Could not read the image'));
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > height && width > maxSize) { height = Math.round(height * (maxSize / width)); width = maxSize; }
+        else if (height > maxSize) { width = Math.round(width * (maxSize / height)); height = maxSize; }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(dataUrl.split(',')[1]);
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function setImagePreview(url) {
+  currentImageUrl = url || '';
+  const wrap = qs('#image-preview-wrap');
+  if (currentImageUrl) {
+    qs('#image-preview').src = currentImageUrl;
+    wrap.style.display = 'block';
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+qs('#f-image').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const status = qs('#image-status');
+  status.textContent = 'Uploading photo…';
+  try {
+    const fileBase64 = await resizeImageToBase64(file);
+    const { url } = await callFn({ action: 'upload_image', fileBase64, contentType: 'image/jpeg' });
+    setImagePreview(url);
+    status.textContent = 'Photo uploaded.';
+  } catch (err) {
+    status.textContent = '';
+    alert('Photo upload failed: ' + err.message);
+  }
+  e.target.value = '';
+});
+
+qs('#remove-image-btn').addEventListener('click', () => {
+  setImagePreview('');
+  qs('#image-status').textContent = '';
+});
 
 async function callFn(body) {
   const res = await fetch(FN_URL, {
@@ -174,9 +240,12 @@ async function loadProducts() {
   qs('#product-count').textContent = products.length;
   list.innerHTML = products.length ? products.map((p) => `
     <div class="product-row" data-id="${p.id}">
-      <div>
-        <h3>${escapeHtml(p.name)}${p.brand ? ' — ' + escapeHtml(p.brand) : ''}</h3>
-        <p>${escapeHtml(CATEGORY_LABELS[p.tone] || p.category)} · ${escapeHtml(p.spec)}</p>
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        ${p.image_url ? `<img src="${escapeHtml(p.image_url)}" style="width:44px;height:44px;object-fit:cover;border-radius:4px;flex-shrink:0" />` : ''}
+        <div>
+          <h3>${escapeHtml(p.name)}${p.brand ? ' — ' + escapeHtml(p.brand) : ''}</h3>
+          <p>${escapeHtml(CATEGORY_LABELS[p.tone] || p.category)} · ${escapeHtml(p.spec)}</p>
+        </div>
       </div>
       <div class="actions">
         <button class="btn-edit" data-edit="${p.id}" type="button">Edit</button>
@@ -199,6 +268,7 @@ function fillForm(product) {
   qs('#f-brand').value = product.brand || '';
   qs('#f-detail').value = product.detail;
   qs('#f-spec').value = product.spec;
+  setImagePreview(product.image_url || '');
   qs('#cancel-edit-btn').style.display = 'inline-block';
   qs('#save-btn').textContent = 'Save changes';
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -208,11 +278,13 @@ function resetForm() {
   editingId = null;
   qs('#form-title').textContent = 'Add a new product';
   qs('#product-form').reset();
+  setImagePreview('');
+  qs('#image-status').textContent = '';
   qs('#cancel-edit-btn').style.display = 'none';
   qs('#save-btn').textContent = 'Save product';
 }
 
-qs('#cancel-edit-btn').addEventListener('click', resetForm);
+qs('#cancel-edit-btn').addEventListener('click', () => { resetForm(); qs('#form-msg').textContent = ''; });
 
 qs('#product-list').addEventListener('click', async (e) => {
   const editBtn = e.target.closest('[data-edit]');
@@ -246,6 +318,7 @@ qs('#product-form').addEventListener('submit', async (e) => {
     detail: qs('#f-detail').value.trim(),
     spec: qs('#f-spec').value.trim(),
     tone,
+    image_url: currentImageUrl || null,
     sort_order: editingId ? undefined : maxSort + 1,
   };
   try {

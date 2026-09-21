@@ -24,7 +24,7 @@ let products = [
 async function loadProducts() {
   const { data, error } = await supabase
     .from('products')
-    .select('name, category, brand, detail, spec, tone')
+    .select('name, category, brand, detail, spec, tone, image_url')
     .order('sort_order', { ascending: true });
   if (error || !data || !data.length) return;
   products = data.map((row) => ({
@@ -33,6 +33,7 @@ async function loadProducts() {
     detail: row.detail,
     spec: row.spec,
     tone: row.tone || 'cement',
+    image: row.image_url || '',
   }));
   renderProducts();
 }
@@ -145,7 +146,7 @@ function renderProducts() {
   productGrid.innerHTML = matches.length ? matches.map((product) => {
     const index = products.indexOf(product);
     return `<article class="product reveal">
-      <button class="product-image ${product.tone}" data-quick-view="${index}" aria-label="View ${product.name} details"><span>0${index + 1}</span><i></i><em>Quick view ↗</em></button>
+      <button class="product-image ${product.tone}" data-quick-view="${index}" aria-label="View ${product.name} details"><span>0${index + 1}</span>${product.image ? `<img src="${product.image}" alt="" loading="lazy" />` : '<i></i>'}<em>Quick view ↗</em></button>
       <div class="product-meta"><p>${product.category}</p><h3>${product.name}</h3><span>Price available on request</span></div>
       <div class="product-actions"><button class="add-product" data-add-product="${index}" type="button">Add to quote <b>+</b></button><button class="enquire" data-enquire="${index}" type="button" aria-label="Enquire about ${product.name}">↗</button></div>
     </article>`;
@@ -168,7 +169,7 @@ function closeModal(dialog) {
 
 function showProduct(product) {
   qs('#dialog-content').innerHTML = `
-    <div class="dialog-art ${product.tone}"><i></i></div>
+    <div class="dialog-art ${product.tone}">${product.image ? `<img src="${product.image}" alt="" />` : '<i></i>'}</div>
     <div class="dialog-copy">
       <p class="eyebrow">${product.category}</p><h2>${product.name}</h2><p>${product.detail}</p>
       <dl><div><dt>Specification</dt><dd>${product.spec}</dd></div><div><dt>Price</dt><dd>Available on request</dd></div></dl>
