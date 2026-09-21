@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="IFEME & CO: browse building materials, build a material list, and request a current quote." />
+    <meta property="og:title" content="IFEME & CO | Building materials with confidence" />
+    <meta property="og:description" content="Explore materials, build your list, and request a current quote." />
+    <meta property="og:image" content="/logo-full.png" />
+    <meta name="theme-color" content="#123FBF" />
+    <title>IFEME & CO | Building Materials</title>
+    <link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/favicon.png" sizes="48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <a class="brand" href="#top" aria-label="Ifeme and Co home"><img class="brand-mark" src="/logo-mark.png" alt="" width="32" height="32" /><span>IFEME <i>&</i> CO</span></a>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="#materials">Materials</a><a href="#services">Services</a><a href="#about">About</a><a href="#showcase">Showcase</a><a href="#contact">Contact</a>
+      </nav>
+      <div class="header-actions"><button class="text-link list-trigger" type="button">Your list <span class="list-count">0</span></button><a class="button button-dark" href="#quote">Get a quote <span>↗</span></a></div>
+      <button class="menu-toggle" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span><em>Menu</em></button>
+      <div id="mobile-menu" class="mobile-menu" hidden><a href="#materials">Materials</a><a href="#services">Services</a><a href="#about">About</a><a href="#showcase">Showcase</a><a href="#contact">Contact</a><button class="button button-accent list-trigger" type="button">Your material list <span class="list-count">0</span></button><a class="button button-dark" href="#quote">Get a quote</a></div>
+    </header>
+    <main id="main">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">IFEME & CO <span>•</span> BUILDING MATERIALS</p>
+          <h1>Build with <em>confidence.</em></h1>
+          <p class="hero-intro">A focused materials range, a straightforward way to request prices, and practical help for projects of every scale.</p>
+          <div class="hero-ctas"><a class="button button-accent" href="#materials">Explore products <span>↓</span></a><a class="button button-outline" href="#quote">Request a quote <span>↗</span></a></div>
+          <p class="hero-note">Have a material list already? <a href="#quote">Send it for a quote</a></p>
+        </div>
+        <div class="hero-visual" aria-label="A selection of construction materials in a warehouse" role="img">
+          <div class="hero-stamp">IFEME<br>& CO<br>SUPPLY</div><div class="sun"></div><div class="stack stack-a"></div><div class="stack stack-b"></div><div class="rebar"></div><p>MATERIALS FOR<br><i>THE WORK AHEAD.</i></p>
+        </div>
+      </section>
+
+      <section class="benefits" aria-label="How we help"><article><span>01</span><h2>Material discovery</h2><p>Browse essentials by product type and project need.</p></article><article><span>02</span><h2>Current pricing</h2><p>Request up-to-date prices before you commit.</p></article><article><span>03</span><h2>Simple ordering</h2><p>Turn a list into a clear quote request in minutes.</p></article><article><span>04</span><h2>Delivery enquiries</h2><p>Ask the team about options for your materials.</p></article></section>
+
+      <section class="section categories" id="materials"><div class="section-head"><div><p class="eyebrow">EXPLORE OUR RANGE</p><h2>Materials for every<br><em>stage of the build.</em></h2></div><p>Browse a focused selection of essentials. Need something specific? Send us your list and we’ll help source it.</p></div><div class="category-grid" id="category-grid"></div></section>
+
+      <section class="section featured"><div class="section-head"><div><p class="eyebrow">POPULAR STARTING POINTS</p><h2>Get your materials<br><em>list underway.</em></h2></div><button class="under-link list-trigger" type="button">View your material list <span>↗</span></button></div><div class="product-tools"><label class="product-search"><span>⌕</span><input id="product-search" type="search" placeholder="Search materials" autocomplete="off" /><button id="clear-search" type="button" aria-label="Clear search" hidden>×</button></label><div class="filter-group" aria-label="Filter materials"><button class="filter is-active" data-filter="all" type="button">All materials</button><button class="filter" data-filter="cement" type="button">Cement & concrete</button><button class="filter" data-filter="steel" type="button">Steel & iron</button><button class="filter" data-filter="roof" type="button">Roofing</button><button class="filter" data-filter="plumbing" type="button">Plumbing</button></div></div><p id="search-status" class="search-status" role="status" aria-live="polite"></p><div class="product-grid" id="product-grid"></div></section>
+
+      <section class="quote-section" id="quote"><div class="quote-intro"><p class="eyebrow">QUOTES WITHOUT THE RUNAROUND</p><h2>Send your<br><em>material list.</em></h2><p>Add what you need, adjust quantities, then send one clear request to the IFEME & CO team. No account needed.</p><div class="quote-steps"><span>01 Add materials</span><span>02 Set quantities</span><span>03 Request quote</span></div></div><div class="quote-card"><div class="quote-card-head"><h3>Your material list</h3><span id="quote-item-count">0 items</span></div><div id="quote-items" class="quote-items"><p class="empty-list">Your list is empty. Add products above or use the form below.</p></div><div class="quick-add"><label for="custom-material">Add another material</label><div><input id="custom-material" placeholder="e.g. Binding wire" /><button class="add-custom" aria-label="Add material">+</button></div></div><button id="request-quote" class="button button-accent button-full">Send your material list <span>↗</span></button><p class="config-note">WhatsApp destination will be enabled when your business number is added.</p></div></section>
+
+      <section class="section reasons" id="services"><div class="reason-intro"><p class="eyebrow">MORE THAN A MATERIALS RUN</p><h2>A practical partner<br>for the work <em>ahead.</em></h2></div><div class="reason-list"><article><span>01</span><h3>Clear, direct help</h3><p>Tell us what you’re building. We’ll help make the materials conversation easier.</p></article><article><span>02</span><h3>One list, less running around</h3><p>Use the quote builder to organise your requirements before you contact us.</p></article><article><span>03</span><h3>A store you can return to</h3><p>From first foundations to final finishing touches, keep your supply list close.</p></article></div></section>
+
+      <section class="showcase" id="showcase"><div class="showcase-image one"><span>01 / THE YARD</span></div><div class="showcase-copy"><p class="eyebrow">OUR SHOWROOM & YARD</p><h2>See it. Check it.<br><em>Get building.</em></h2><p>Come in with a plan, a sketch, or a simple question. We’re building this space to make material shopping more straightforward.</p><a class="under-link" href="#contact">Find the store <span>↓</span></a></div><div class="showcase-image two"><span>02 / MATERIALS</span></div></section>
+
+      <section class="about section" id="about"><div class="about-panel"><p class="eyebrow">LOCAL, BY DESIGN</p><h2>For the project<br>you’re <em>living with.</em></h2></div><div class="about-text"><p class="lead">IFEME & CO is built around a simple idea: buying building materials should feel considered, clear, and human.</p><p>We’re creating a better local materials experience—one that respects your time, your budget, and the work you’re putting into your space.</p><a href="#contact" class="button button-dark">Talk to us <span>↗</span></a></div></section>
+
+      <section class="contact" id="contact"><div><p class="eyebrow">VISIT OR GET IN TOUCH</p><h2>Let’s get your<br><em>project moving.</em></h2></div><div class="contact-details"><div><p class="detail-label">STORE LOCATION</p><p class="pending">Add your store address</p><a href="#" class="under-link disabled-link">Get directions <span>↗</span></a></div><div><p class="detail-label">OPENING HOURS</p><p class="pending">Add your opening hours</p><p class="detail-label space">CALL / WHATSAPP</p><p class="pending">Add your phone number</p></div></div><a class="button button-accent contact-button" href="#quote">Start a quote <span>↗</span></a></section>
+    </main>
+    <footer><a class="brand" href="#top"><img class="brand-mark" src="/logo-mark.png" alt="" width="32" height="32" /><span>IFEME <i>&</i> CO</span></a><p>Building materials for real projects.</p><div><a href="#materials">Materials</a><a href="#quote">Get a quote</a><a href="#contact">Contact</a></div><small>© <span id="year"></span> IFEME & CO. Details and availability subject to confirmation.</small></footer>
+    <a class="whatsapp-float" id="whatsapp-float" href="#quote" aria-label="Start a quote through WhatsApp"><b>◔</b><span>WhatsApp</span></a>
+    <nav class="mobile-action-bar" aria-label="Quick contact actions">
+      <a href="#quote"><span class="mobile-action-icon">◔</span><span>WhatsApp</span></a>
+      <a class="mobile-action-primary" href="#quote"><span class="mobile-action-icon">＋</span><span>Get quote</span></a>
+      <a href="#contact"><span class="mobile-action-icon">⌁</span><span>Call</span></a>
+    </nav>
+    <dialog id="product-dialog"><button class="dialog-close" aria-label="Close product details">×</button><div id="dialog-content"></div></dialog>
+    <dialog id="quote-drawer" class="quote-drawer"><div class="drawer-head"><div><p class="eyebrow">YOUR SELECTION</p><h2>Material list</h2></div><button class="drawer-close" aria-label="Close material list">×</button></div><div id="drawer-items" class="drawer-items"></div><p class="drawer-price-note">Price available on request.</p><button id="clear-list" class="clear-list" type="button">Clear list</button><button id="drawer-request-quote" class="button button-accent button-full">Send your material list <span>↗</span></button></dialog>
+    <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
