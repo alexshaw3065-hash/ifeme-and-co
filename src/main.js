@@ -1,3 +1,9 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const SUPABASE_URL = 'https://acsjuozoaylvwdrandsd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjc2p1b3pvYXlsdndkcmFuZHNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5OTkwMjksImV4cCI6MjEwNTU3NTAyOX0.A6lRL_RAi4kzds3v1SjO-06uAICUWxFVnxTL8H6FDA4';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 const config = { whatsapp: '2348036224254', storeName: 'IFEME & CO' };
 const categories = [
   ['Cement & concrete', 'Concrete, blocks, aggregates, and the essentials beneath every build.', 'cement'],
@@ -7,12 +13,29 @@ const categories = [
   ['Paint & finishing', 'The materials that bring the final layer together.', 'paint'],
   ['Hardware & tools', 'Fixings, tools, and useful bits for the jobs in between.', 'tools']
 ];
-const products = [
+// Fallback shown if the live catalog can't be reached; overwritten by loadProducts() on success.
+let products = [
   { name: 'Cement', category: 'Cement & Concrete', detail: 'A core material for structural and finishing work.', spec: 'Available bag sizes on request', tone: 'cement' },
   { name: 'Reinforcement bar', category: 'Steel & Iron', detail: 'For concrete reinforcement and construction work.', spec: 'Available diameters on request', tone: 'steel' },
   { name: 'Roofing sheets', category: 'Roofing', detail: 'Request available profiles, lengths, and finishes.', spec: 'Profile and length options available', tone: 'roof' },
   { name: 'PVC piping', category: 'Plumbing', detail: 'Request current sizes and fitting availability.', spec: 'Sizes and fittings available', tone: 'plumbing' }
 ];
+
+async function loadProducts() {
+  const { data, error } = await supabase
+    .from('products')
+    .select('name, category, brand, detail, spec, tone')
+    .order('sort_order', { ascending: true });
+  if (error || !data || !data.length) return;
+  products = data.map((row) => ({
+    name: row.brand ? `${row.name} — ${row.brand}` : row.name,
+    category: row.category,
+    detail: row.detail,
+    spec: row.spec,
+    tone: row.tone || 'cement',
+  }));
+  renderProducts();
+}
 
 let list = [];
 let activeFilter = 'all';
@@ -304,3 +327,4 @@ renderCategories();
 renderProducts();
 renderList();
 observeReveals();
+loadProducts();

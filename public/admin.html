@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>IFEME & CO — Product Admin</title>
+<style>
+  :root{--blue:#123fbf;--red:#c91f3d;--text:#0a0a0a;--muted:#626a77;--border:#dce1e9;--surface:#f7f8fa}
+  *{box-sizing:border-box}
+  body{margin:0;font:15px/1.5 Arial,Helvetica,sans-serif;background:var(--surface);color:var(--text)}
+  header{background:var(--blue);color:#fff;padding:18px 20px;font-weight:800;letter-spacing:.02em}
+  main{max-width:720px;margin:0 auto;padding:20px}
+  .card{background:#fff;border:1px solid var(--border);border-radius:6px;padding:20px;margin-bottom:18px}
+  h1{font-size:18px;margin:0}
+  h2{font-size:15px;margin:0 0 14px}
+  label{display:block;font-size:12px;font-weight:700;margin:12px 0 5px}
+  input,select,textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:4px;font:inherit}
+  textarea{min-height:60px;resize:vertical}
+  button{cursor:pointer;font:inherit;font-weight:700;border-radius:4px;border:0;padding:11px 16px}
+  .btn-primary{background:var(--blue);color:#fff;width:100%;margin-top:16px}
+  .btn-primary:hover{background:#0b2e91}
+  .btn-danger{background:transparent;color:var(--red);border:1px solid var(--red);padding:6px 10px;font-size:12px}
+  .btn-edit{background:transparent;color:var(--blue);border:1px solid var(--blue);padding:6px 10px;font-size:12px}
+  .btn-secondary{background:transparent;color:var(--muted);border:1px solid var(--border);padding:6px 10px;font-size:12px}
+  .row{display:flex;gap:8px;margin-top:10px}
+  .product-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)}
+  .product-row:last-child{border-bottom:0}
+  .product-row h3{margin:0 0 3px;font-size:14px}
+  .product-row p{margin:0;font-size:12px;color:var(--muted)}
+  .product-row .actions{display:flex;gap:6px;flex-shrink:0}
+  .msg{font-size:13px;margin-top:10px;padding:10px;border-radius:4px}
+  .msg.error{background:#fdecef;color:var(--red)}
+  .msg.success{background:#e9f8ee;color:#1a7f37}
+  #login-screen{max-width:340px;margin:60px auto}
+  #app{display:none}
+  .hint{font-size:11px;color:var(--muted);margin-top:4px}
+  .top-actions{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+</style>
+</head>
+<body>
+<header><a href="/" style="color:#fff;text-decoration:none">← IFEME & CO</a> · Product Admin</header>
+<main>
+
+  <div id="login-screen" class="card">
+    <h2>Enter admin password</h2>
+    <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" />
+    <button class="btn-primary" id="login-btn">Unlock</button>
+    <div id="login-msg"></div>
+  </div>
+
+  <div id="app">
+    <div class="top-actions">
+      <h1>Products</h1>
+      <button class="btn-secondary" id="change-pw-toggle" type="button">Change password</button>
+    </div>
+
+    <div class="card" id="change-pw-card" style="display:none">
+      <h2>Change admin password</h2>
+      <label for="new-pw">New password (at least 6 characters)</label>
+      <input type="password" id="new-pw" />
+      <label for="confirm-pw">Confirm new password</label>
+      <input type="password" id="confirm-pw" />
+      <button class="btn-primary" id="save-pw-btn">Save new password</button>
+      <div id="pw-msg"></div>
+    </div>
+
+    <div class="card">
+      <h2 id="form-title">Add a new product</h2>
+      <form id="product-form">
+        <label for="f-category">Category</label>
+        <select id="f-category" required>
+          <option value="">Select a category</option>
+          <option value="cement">Cement &amp; Concrete</option>
+          <option value="steel">Steel &amp; Iron</option>
+          <option value="roof">Roofing</option>
+          <option value="plumbing">Plumbing</option>
+          <option value="paint">Paint &amp; Finishing</option>
+          <option value="tools">Hardware &amp; Tools</option>
+        </select>
+
+        <label for="f-name">Product name</label>
+        <input id="f-name" placeholder="e.g. Gloss Paint" required />
+
+        <label for="f-brand">Brand (optional)</label>
+        <input id="f-brand" placeholder="e.g. Dulux" />
+        <p class="hint">Leave blank if the product has no specific brand.</p>
+
+        <label for="f-detail">Short description</label>
+        <textarea id="f-detail" placeholder="e.g. Durable, high-shine finish for interior and exterior walls." required></textarea>
+
+        <label for="f-spec">Sizes / specification</label>
+        <input id="f-spec" placeholder="e.g. 1L, 4L, 20L available" required />
+
+        <div class="row">
+          <button class="btn-primary" type="submit" id="save-btn">Save product</button>
+          <button class="btn-secondary" type="button" id="cancel-edit-btn" style="display:none">Cancel edit</button>
+        </div>
+        <div id="form-msg"></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Current products (<span id="product-count">0</span>)</h2>
+      <div id="product-list">Loading…</div>
+    </div>
+  </div>
+
+</main>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const SUPABASE_URL = 'https://acsjuozoaylvwdrandsd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjc2p1b3pvYXlsdndkcmFuZHNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5OTkwMjksImV4cCI6MjEwNTU3NTAyOX0.A6lRL_RAi4kzds3v1SjO-06uAICUWxFVnxTL8H6FDA4';
+const FN_URL = `${SUPABASE_URL}/functions/v1/admin-write`;
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const CATEGORY_LABELS = {
+  cement: 'Cement & Concrete',
+  steel: 'Steel & Iron',
+  roof: 'Roofing',
+  plumbing: 'Plumbing',
+  paint: 'Paint & Finishing',
+  tools: 'Hardware & Tools',
+};
+
+const qs = (sel) => document.querySelector(sel);
+let sessionPassword = sessionStorage.getItem('ifeme_admin_pw') || '';
+let editingId = null;
+let products = [];
+
+async function callFn(body) {
+  const res = await fetch(FN_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: sessionPassword, ...body }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Something went wrong');
+  return data;
+}
+
+async function tryLogin(password) {
+  sessionPassword = password;
+  await callFn({ action: 'verify' });
+  sessionStorage.setItem('ifeme_admin_pw', password);
+  qs('#login-screen').style.display = 'none';
+  qs('#app').style.display = 'block';
+  await loadProducts();
+}
+
+qs('#login-btn').addEventListener('click', async () => {
+  const password = qs('#login-password').value;
+  const msg = qs('#login-msg');
+  msg.textContent = '';
+  try {
+    await tryLogin(password);
+  } catch (err) {
+    msg.innerHTML = `<div class="msg error">${err.message}</div>`;
+  }
+});
+qs('#login-password').addEventListener('keydown', (e) => { if (e.key === 'Enter') qs('#login-btn').click(); });
+
+if (sessionPassword) {
+  tryLogin(sessionPassword).catch(() => { sessionStorage.removeItem('ifeme_admin_pw'); });
+}
+
+async function loadProducts() {
+  const { data, error } = await supabase.from('products').select('*').order('sort_order', { ascending: true });
+  const list = qs('#product-list');
+  if (error) { list.innerHTML = `<div class="msg error">Could not load products: ${error.message}</div>`; return; }
+  products = data;
+  qs('#product-count').textContent = products.length;
+  list.innerHTML = products.length ? products.map((p) => `
+    <div class="product-row" data-id="${p.id}">
+      <div>
+        <h3>${escapeHtml(p.name)}${p.brand ? ' — ' + escapeHtml(p.brand) : ''}</h3>
+        <p>${escapeHtml(CATEGORY_LABELS[p.tone] || p.category)} · ${escapeHtml(p.spec)}</p>
+      </div>
+      <div class="actions">
+        <button class="btn-edit" data-edit="${p.id}" type="button">Edit</button>
+        <button class="btn-danger" data-delete="${p.id}" type="button">Delete</button>
+      </div>
+    </div>`).join('') : '<p class="hint">No products yet. Add your first one above.</p>';
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str ?? '';
+  return div.innerHTML;
+}
+
+function fillForm(product) {
+  editingId = product.id;
+  qs('#form-title').textContent = `Editing: ${product.name}`;
+  qs('#f-category').value = product.tone;
+  qs('#f-name').value = product.name;
+  qs('#f-brand').value = product.brand || '';
+  qs('#f-detail').value = product.detail;
+  qs('#f-spec').value = product.spec;
+  qs('#cancel-edit-btn').style.display = 'inline-block';
+  qs('#save-btn').textContent = 'Save changes';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetForm() {
+  editingId = null;
+  qs('#form-title').textContent = 'Add a new product';
+  qs('#product-form').reset();
+  qs('#cancel-edit-btn').style.display = 'none';
+  qs('#save-btn').textContent = 'Save product';
+}
+
+qs('#cancel-edit-btn').addEventListener('click', resetForm);
+
+qs('#product-list').addEventListener('click', async (e) => {
+  const editBtn = e.target.closest('[data-edit]');
+  const delBtn = e.target.closest('[data-delete]');
+  if (editBtn) {
+    const product = products.find((p) => p.id === editBtn.dataset.edit);
+    if (product) fillForm(product);
+  }
+  if (delBtn) {
+    if (!confirm('Delete this product? This cannot be undone.')) return;
+    try {
+      await callFn({ action: 'delete', id: delBtn.dataset.delete });
+      await loadProducts();
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+});
+
+qs('#product-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = qs('#form-msg');
+  msg.textContent = '';
+  const tone = qs('#f-category').value;
+  const maxSort = products.reduce((max, p) => Math.max(max, p.sort_order || 0), 0);
+  const product = {
+    id: editingId || undefined,
+    name: qs('#f-name').value.trim(),
+    category: CATEGORY_LABELS[tone],
+    brand: qs('#f-brand').value.trim(),
+    detail: qs('#f-detail').value.trim(),
+    spec: qs('#f-spec').value.trim(),
+    tone,
+    sort_order: editingId ? undefined : maxSort + 1,
+  };
+  try {
+    await callFn({ action: 'upsert', product });
+    msg.innerHTML = `<div class="msg success">Saved.</div>`;
+    resetForm();
+    await loadProducts();
+  } catch (err) {
+    msg.innerHTML = `<div class="msg error">${err.message}</div>`;
+  }
+});
+
+qs('#change-pw-toggle').addEventListener('click', () => {
+  const card = qs('#change-pw-card');
+  card.style.display = card.style.display === 'none' ? 'block' : 'none';
+});
+
+qs('#save-pw-btn').addEventListener('click', async () => {
+  const newPw = qs('#new-pw').value;
+  const confirmPw = qs('#confirm-pw').value;
+  const msg = qs('#pw-msg');
+  msg.textContent = '';
+  if (newPw !== confirmPw) { msg.innerHTML = `<div class="msg error">Passwords don't match.</div>`; return; }
+  if (newPw.length < 6) { msg.innerHTML = `<div class="msg error">Use at least 6 characters.</div>`; return; }
+  try {
+    await callFn({ action: 'change_password', newPassword: newPw });
+    sessionPassword = newPw;
+    sessionStorage.setItem('ifeme_admin_pw', newPw);
+    qs('#new-pw').value = '';
+    qs('#confirm-pw').value = '';
+    msg.innerHTML = `<div class="msg success">Password changed.</div>`;
+  } catch (err) {
+    msg.innerHTML = `<div class="msg error">${err.message}</div>`;
+  }
+});
+</script>
+</body>
+</html>
