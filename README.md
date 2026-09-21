@@ -4,4 +4,4 @@ Open `index.html` directly in a browser, or install the development dependency a
 
 ## Before publishing
 
-Update `config` near the top of `src/main.js` with the business WhatsApp number (digits only, including country code). Replace the clearly labelled location, hours, and phone placeholders in `index.html` with confirmed store details. The site deliberately avoids publishing unverified business facts or prices.
+Store address, phone/WhatsApp (`config.whatsapp` in `src/main.js`), and the `tel:`/contact links in `index.html` are set. Opening hours are still a placeholder — add them in the "OPENING HOURS" block in `index.html` once confirmed. The site deliberately avoids publishing unverified business facts or prices.

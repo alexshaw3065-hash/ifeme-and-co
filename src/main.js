@@ -1,4 +1,4 @@
-const config = { whatsapp: '', storeName: 'IFEME & CO' };
+const config = { whatsapp: '2348036224254', storeName: 'IFEME & CO' };
 const categories = [
   ['Cement & concrete', 'Concrete, blocks, aggregates, and the essentials beneath every build.', 'cement'],
   ['Steel & iron', 'Reinforcement and structural materials for the work that needs strength.', 'steel'],
