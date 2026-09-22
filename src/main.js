@@ -257,6 +257,8 @@ document.addEventListener('click', (event) => {
   const decrease = event.target.closest('[data-decrease]');
   const removeButton = event.target.closest('[data-remove]');
   const listTrigger = event.target.closest('.list-trigger');
+  const directWhatsapp = event.target.closest('#whatsapp-float, #mobile-whatsapp-link');
+  if (directWhatsapp) trackEvent('whatsapp_click', { meta: { source: directWhatsapp.id } });
   if (addButton) add(products[addButton.dataset.addProduct].name);
   if (quickView) showProduct(products[quickView.dataset.quickView]);
   if (enquire) {
