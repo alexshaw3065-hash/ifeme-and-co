@@ -24,10 +24,11 @@ let products = [
 async function loadProducts() {
   const { data, error } = await supabase
     .from('products')
-    .select('name, category, brand, detail, spec, tone, image_url')
+    .select('id, name, category, brand, detail, spec, tone, image_url')
     .order('sort_order', { ascending: true });
   if (error || !data || !data.length) return;
   products = data.map((row) => ({
+    id: row.id,
     name: row.brand ? `${row.name} — ${row.brand}` : row.name,
     category: row.category,
     detail: row.detail,
@@ -36,6 +37,20 @@ async function loadProducts() {
     image: row.image_url || '',
   }));
   renderProducts();
+}
+
+function trackEvent(eventType, { productId = null, productName = null, meta = {} } = {}) {
+  supabase.from('analytics_events').insert({
+    event_type: eventType,
+    product_id: productId,
+    product_name: productName,
+    page: location.pathname,
+    meta,
+  }).then(() => {}, () => {});
+}
+
+function findProductByName(name) {
+  return products.find((product) => product.name.toLowerCase() === name.toLowerCase());
 }
 
 let list = [];
@@ -57,12 +72,13 @@ function showToast(message, type = 'success') {
   toastTimer = setTimeout(() => toast.classList.remove('is-visible'), 2600);
 }
 
-function whatsapp(message) {
+function whatsapp(message, meta = {}) {
   if (!config.whatsapp) {
     showToast('WhatsApp is not configured yet.', 'error');
     return false;
   }
   window.open(`https://wa.me/${config.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`, '_blank', 'noopener');
+  trackEvent('whatsapp_click', { meta });
   return true;
 }
 
@@ -177,7 +193,10 @@ function showProduct(product) {
     </div>`;
   openModal(productDialog, document.activeElement);
   qs('.dialog-add').onclick = () => { add(product.name); closeModal(productDialog); };
-  qs('.dialog-enquire').onclick = () => whatsapp(`Hello, I'm interested in ${product.name}.\nPlease send me the current price and availability.`);
+  qs('.dialog-enquire').onclick = () => {
+    trackEvent('product_interest', { productId: product.id, productName: product.name, meta: { source: 'quick_view' } });
+    whatsapp(`Hello, I'm interested in ${product.name}.\nPlease send me the current price and availability.`, { source: 'quick_view' });
+  };
 }
 
 function openQuote(trigger) {
@@ -242,7 +261,8 @@ document.addEventListener('click', (event) => {
   if (quickView) showProduct(products[quickView.dataset.quickView]);
   if (enquire) {
     const product = products[enquire.dataset.enquire];
-    whatsapp(`Hello, I'm interested in ${product.name}.\nPlease send me the current price and availability.`);
+    trackEvent('product_interest', { productId: product.id, productName: product.name, meta: { source: 'product_card' } });
+    whatsapp(`Hello, I'm interested in ${product.name}.\nPlease send me the current price and availability.`, { source: 'product_card' });
   }
   if (increase) updateQuantity(Number(increase.dataset.increase), 'increase');
   if (decrease) updateQuantity(Number(decrease.dataset.decrease), 'decrease');
@@ -269,7 +289,11 @@ qs('#custom-material').addEventListener('keydown', (event) => {
 
 function requestQuote() {
   if (!list.length) { showToast('Add at least one material first.', 'error'); return; }
-  whatsapp(quoteMessage());
+  list.forEach((item) => {
+    const product = findProductByName(item.name);
+    trackEvent('product_interest', { productId: product ? product.id : null, productName: item.name, meta: { source: 'quote', qty: item.qty } });
+  });
+  whatsapp(quoteMessage(), { source: 'quote', item_count: list.length });
 }
 qs('#request-quote').addEventListener('click', requestQuote);
 qs('#drawer-request-quote').addEventListener('click', requestQuote);
@@ -329,3 +353,4 @@ renderProducts();
 renderList();
 observeReveals();
 loadProducts();
+trackEvent('page_view');
