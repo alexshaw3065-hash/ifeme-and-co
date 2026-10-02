@@ -10,7 +10,7 @@ const categories = [
   ['Steel & iron', 'Reinforcement and structural materials for the work that needs strength.', 'steel'],
   ['Roofing', 'Protect and finish your project with roofing materials and accessories.', 'roof'],
   ['Plumbing', 'Pipes, fittings, valves, and practical water solutions.', 'plumbing'],
-  ['Paint & finishing', 'The materials that bring the final layer together.', 'paint'],
+  ['Paint & finishing', 'Mortex textured paint, gloss paint, and the materials that bring the final layer together.', 'paint'],
   ['Hardware & tools', 'Fixings, tools, and useful bits for the jobs in between.', 'tools']
 ];
 // Fallback shown if the live catalog can't be reached; overwritten by loadProducts() on success.
@@ -18,7 +18,9 @@ let products = [
   { name: 'Cement', category: 'Cement & Concrete', detail: 'A core material for structural and finishing work.', spec: 'Available bag sizes on request', tone: 'cement' },
   { name: 'Reinforcement bar', category: 'Steel & Iron', detail: 'For concrete reinforcement and construction work.', spec: 'Available diameters on request', tone: 'steel' },
   { name: 'Roofing sheets', category: 'Roofing', detail: 'Request available profiles, lengths, and finishes.', spec: 'Profile and length options available', tone: 'roof' },
-  { name: 'PVC piping', category: 'Plumbing', detail: 'Request current sizes and fitting availability.', spec: 'Sizes and fittings available', tone: 'plumbing' }
+  { name: 'PVC piping', category: 'Plumbing', detail: 'Request current sizes and fitting availability.', spec: 'Sizes and fittings available', tone: 'plumbing' },
+  { name: 'Mortex textured paint', category: 'Paint & Finishing', detail: 'Decorative textured wall finish, ideal for exterior walls and feature walls.', spec: 'Available in various textures and colours on request', tone: 'paint' },
+  { name: 'Gloss paint', category: 'Paint & Finishing', detail: 'Durable, high-shine finish for interior and exterior walls.', spec: '1L, 4L, and 20L available', tone: 'paint' }
 ];
 
 async function loadProducts() {
